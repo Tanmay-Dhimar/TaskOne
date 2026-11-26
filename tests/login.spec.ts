@@ -5,7 +5,7 @@ test.use({
     storageState:{cookies:[],origins:[]}
 });
 
-test('TC_02 - Unsuccessful Login',async({page})=>{
+test('TC_02 - Unsuccessful Login'{tag:'@regression'},async({page})=>{
     const loginObj = new LoginPageSause(page);
     await loginObj.loginSauceFailed('locked_out_user','secret_sauce');
     await expect(loginObj.loginMsg).toHaveText('Epic sadface: Sorry, this user has been locked out.');
