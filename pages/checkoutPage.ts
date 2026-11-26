@@ -12,6 +12,7 @@ export class CheckOut{
     pName:Locator;
     finishBtn:Locator;
     textConfm:Locator;
+    errorMsg:Locator;
     constructor(page:Page)
     {
         this.page=page;
@@ -24,8 +25,9 @@ export class CheckOut{
         this.totalItem=page.locator(".summary_subtotal_label");
         this.tax=page.locator(".summary_tax_label");
         this.total=page.locator(".summary_total_label");
-        this.finishBtn=page.getByRole("button",{name:'secret_sauce'});
+        this.finishBtn=page.getByRole("button",{name:'Finish'});
         this.textConfm=page.locator(".complete-header");
+        this.errorMsg=page.getByText('Error: First Name is required');
     }
     async fillCheckoutDetails(Name:string,lName:string,zip:string)
     {
@@ -61,6 +63,10 @@ export class CheckOut{
     }
     async confirmation()
     {
-        await this.textConfm.click();
+        await this.textConfm.innerText();
+    }
+    async checkOutEmpty()
+    {
+        await this.continueBtn.click();
     }
 }

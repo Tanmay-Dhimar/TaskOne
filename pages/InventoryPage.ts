@@ -62,4 +62,12 @@ export class InventoryPage{
 
         await this.cartIcon.click();
     }
+    async itemCountRefresh(productOne:string,productTwo:string)
+    {
+        let itemOne = this.products.filter({hasText:productOne});
+        await itemOne.getByRole('button',{name:'Add to cart'}).click();
+        
+        let itemTwo = this.products.filter({hasText:productTwo});
+        await itemTwo.getByRole('button',{name:'Add to cart'}).click();
+    }
 }
