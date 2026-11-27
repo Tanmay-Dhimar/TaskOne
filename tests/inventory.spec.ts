@@ -1,15 +1,11 @@
-import{test,expect} from '@playwright/test';
-import{InventoryPage} from '../pages/InventoryPage';
-import{AddToCart} from '../pages/cartPage';
-import { CheckOut } from '../pages/checkoutPage';
+import { test, expect } from '../fixtures/test-fixtures';
 
 test.beforeEach("Launch",async({page})=>{
     await page.goto("https://www.saucedemo.com/inventory.html");
 });
-test('TC_03 – Product Sorting',{tag:'@regression'},async({page})=>{
-    const inventoryPageobj=new InventoryPage(page);
-    await inventoryPageobj.sortProductsBy('lohi');
-    const prices =await  inventoryPageobj.productsPrice.allTextContents();
+test('TC_03 – Product Sorting',{tag:'@regression'},async({inventoryPage})=>{
+    await inventoryPage .sortProductsBy('lohi');
+    const prices = await inventoryPage .productsPrice.allTextContents();
     for (let i=0;i<prices.length-1;i++){
         let currentPrice = Number(prices[i].replace('$',''));
         let nextprice = Number(prices[i+1].replace('$',''));
@@ -17,74 +13,62 @@ test('TC_03 – Product Sorting',{tag:'@regression'},async({page})=>{
         expect(currentPrice).toBeLessThanOrEqual(nextprice);     
     }
 });
-test('TC_04 - Add product to cart',{tag:['@smoke','@regression']},async({page})=>{
-    const inventoryPageObj=new InventoryPage(page);
-    await inventoryPageObj.addProductToCart('Sauce Labs Backpack');
-    await expect(inventoryPageObj.removeBtn).toBeVisible();
+test('TC_04 - Add product to cart',{tag:['@smoke','@regression']},async({inventoryPage})=>{
+    await inventoryPage.addProductToCart('Sauce Labs Backpack');
+    await expect(inventoryPage .removeBtn).toBeVisible();
 });
-test('TC_05 - Remve product from cart',{tag:'@regression'},async({page})=>{
-    const inventoryPageObj=new InventoryPage(page);
-    await inventoryPageObj.porductRemoveCart('Sauce Labs Backpack');
-    await expect(inventoryPageObj.cartBadge).toBeHidden();
+test('TC_05 - Remve product from cart',{tag:'@regression'},async({inventoryPage})=>{
+    await inventoryPage .porductRemoveCart('Sauce Labs Backpack');
+    await expect(inventoryPage .cartBadge).toBeHidden();
 });
-test('TC_06 - Verify cart item count',{tag:['@smoke','@regression']},async({page})=>{
-    const inventoryPageObj = new InventoryPage(page);
-    await inventoryPageObj.countAddToCart('Sauce Labs Backpack','Sauce Labs Bike Light');
-    await expect(inventoryPageObj.cartBadge).toHaveText('2');
+test('TC_06 - Verify cart item count',{tag:['@smoke','@regression']},async({inventoryPage})=>{
+    await inventoryPage.countAddToCart('Sauce Labs Backpack','Sauce Labs Bike Light');
+    await expect(inventoryPage.cartBadge).toHaveText('2');
 });
-test('TC_07 - Verify cart contents',{tag:'@regression'},async({page})=>{
-    const invetoryPageObj = new InventoryPage(page);
-    await invetoryPageObj.cartProductsVerify('Sauce Labs Backpack','Sauce Labs Bike Light');
+test('TC_07 - Verify cart contents',{tag:'@regression'},async({inventoryPage})=>{
+    await inventoryPage.cartProductsVerify('Sauce Labs Backpack','Sauce Labs Bike Light');
     //.cart_item_label>a>div
-    await expect(invetoryPageObj.cartProducts.nth(0)).toHaveText('Sauce Labs Backpack');
-    await expect(invetoryPageObj.cartProducts.nth(1)).toHaveText('Sauce Labs Bike Light');
+    await expect(inventoryPage.cartProducts.nth(0)).toHaveText('Sauce Labs Backpack');
+    await expect(inventoryPage .cartProducts.nth(1)).toHaveText('Sauce Labs Bike Light');
 });
-test('TC_08 - Verify complete checkout',{tag:['@smoke','@regression']},async({page})=>{
-    const cartObj = new AddToCart(page);
-    const checkOutObj = new CheckOut(page);
-    const inventoryObj = new InventoryPage(page);
+test('TC_08 - Verify complete checkout',{tag:['@smoke','@regression']},async({inventoryPage, cartPage, checkoutPage})=>{
     
-    await inventoryObj.checkoutProducts('Sauce Labs Backpack','Sauce Labs Bike Light');
-    await expect(inventoryObj.cartProducts.nth(0)).toHaveText('Sauce Labs Backpack');
-    await expect(inventoryObj.cartProducts.nth(1)).toHaveText('Sauce Labs Bike Light');
-    await cartObj.checkout();
+    await inventoryPage.checkoutProducts('Sauce Labs Backpack','Sauce Labs Bike Light');
+    await expect(inventoryPage.cartProducts.nth(0)).toHaveText('Sauce Labs Backpack');
+    await expect(inventoryPage.cartProducts.nth(1)).toHaveText('Sauce Labs Bike Light');
+    await cartPage.checkout();
 
-    await checkOutObj.fillCheckoutDetails('Tanmay','Dhimar','395001');
-    await expect(checkOutObj.pName.nth(0)).toHaveText('Sauce Labs Backpack');
-    await expect(checkOutObj.pName.nth(1)).toHaveText('Sauce Labs Bike Light');
+    await checkoutPage.fillCheckoutDetails('Tanmay','Dhimar','395001');
+    await expect(checkoutPage.pName.nth(0)).toHaveText('Sauce Labs Backpack');
+    await expect(checkoutPage.pName.nth(1)).toHaveText('Sauce Labs Bike Light');
     
-    const calSubTotal = await checkOutObj.calTotalOfItem();
-    const displayedItemTotal = await checkOutObj.totalOfItems();
+    const calSubTotal = await checkoutPage.calTotalOfItem();
+    const displayedItemTotal = await checkoutPage.totalOfItems();
     expect(displayedItemTotal).toBe(calSubTotal);
     
-    const taxAmount = await checkOutObj.calTax();
+    const taxAmount = await checkoutPage.calTax();
     expect(taxAmount).toBeGreaterThan(0);
     
-    const actualOrderTotal = await checkOutObj.totalAmt();
-    const expectedOrderTotal = Number((displayedItemTotal+taxAmount));
+    const actualOrderTotal = await checkoutPage.totalAmt();
+    const expectedOrderTotal = Number((displayedItemTotal+taxAmount).toFixed(2));
     expect(actualOrderTotal).toBe(expectedOrderTotal);
 });
-test('TC_09 - Verify Checkout Form Validation',{tag:'@regression'},async({page})=>{
-    const checkOutObj = new CheckOut(page);
-    const inventoryObj= new InventoryPage(page);
-    const cartObj = new AddToCart(page);
+test('TC_09 - Verify Checkout Form Validation',{tag:'@regression'},async({inventoryPage,cartPage,checkoutPage})=>{
     
-    await inventoryObj.checkoutProducts('Sauce Labs Backpack','Sauce Labs Bike Light');
+    await inventoryPage.checkoutProducts('Sauce Labs Backpack','Sauce Labs Bike Light');
     
-    await cartObj.checkout();
+    await cartPage.checkout();
     
-    await checkOutObj.checkOutEmpty();
+    await checkoutPage.checkOutEmpty();
     
-    await expect(checkOutObj.errorMsg).toHaveText('Error: First Name is required');
+    await expect(checkoutPage.errorMsg).toHaveText('Error: First Name is required');
 });
-test('TC_10 – Verify Cart Persistence After Page Reload',{tag:'@regression'},async({page})=>{
-    const invObj = new InventoryPage(page);
-    const checkOutObj = new CheckOut(page);
-    await invObj.itemCountRefresh('Sauce Labs Backpack','Sauce Labs Bike Light');
-    await expect(invObj.cartBadge).toHaveText('2');
+test('TC_10 – Verify Cart Persistence After Page Reload',{tag:'@regression'},async({page,inventoryPage,checkoutPage})=>{
+    await inventoryPage.itemCountRefresh('Sauce Labs Backpack','Sauce Labs Bike Light');
+    await expect(inventoryPage.cartBadge).toHaveText('2');
     await page.reload();
-    await expect(invObj.cartBadge).toHaveText('2');
-    await invObj.cartIcon.click();
-    await expect(checkOutObj.pName.nth(0)).toHaveText('Sauce Labs Backpack');
-    await expect(checkOutObj.pName.nth(1)).toHaveText('Sauce Labs Bike Light');
+    await expect(inventoryPage.cartBadge).toHaveText('2');
+    await inventoryPage.cartIcon.click();
+    await expect(checkoutPage.pName.nth(0)).toHaveText('Sauce Labs Backpack');
+    await expect(checkoutPage.pName.nth(1)).toHaveText('Sauce Labs Bike Light');
 });
