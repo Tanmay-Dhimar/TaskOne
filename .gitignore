@@ -7,3 +7,8 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 /authentication/
+# Playwright authentication state
+authentication/state.json
+# Playwright generated files
+playwright-report/
+test-results/
